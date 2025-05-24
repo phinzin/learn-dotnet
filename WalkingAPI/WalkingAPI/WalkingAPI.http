@@ -1,0 +1,6 @@
+@WalkingAPI_HostAddress = http://localhost:5107
+
+GET {{WalkingAPI_HostAddress}}/api/region
+Accept: application/json
+
+###
