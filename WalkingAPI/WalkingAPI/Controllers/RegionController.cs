@@ -19,7 +19,7 @@ namespace WalkingAPI.Controllers
         }
 
         // GET: api/Region/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:Guid}")]
         public async Task<ActionResult<RegionDto>> GetRegion(Guid id)
         {
             var regionDomain = await regionRepository.GetByIdAsync(id);
@@ -57,7 +57,7 @@ namespace WalkingAPI.Controllers
         }
 
         // DELETE: api/Region/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:Guid}")]
         public async Task<IActionResult> DeleteRegion(Guid id)
         {
             var regionDomain = await regionRepository.DeleteAsync(id);

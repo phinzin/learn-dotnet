@@ -1,102 +1,63 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using WalkingAPI.CustomActionFilters;
 using WalkingAPI.Models.Domain;
+using WalkingAPI.Models.DTO;
+using WalkingAPI.Repositories;
 
 namespace WalkingAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class WalkController : ControllerBase
+    public class WalkController(IWalkRepository repository, IMapper mapper) : ControllerBase
     {
-        private readonly WalkDbContext _context;
-
-        public WalkController(WalkDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/Walk
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Walk>>> GetWalks()
+        public async Task<ActionResult<IEnumerable<Walk?>>> GetWalks()
         {
-            return await _context.Walks.ToListAsync();
+            return await repository.GetAllAsync();
         }
 
-        // GET: api/Walk/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Walk>> GetWalk(Guid id)
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<Walk>> GetWalk([FromRoute] Guid id)
         {
-            var walk = await _context.Walks.FindAsync(id);
-
-            if (walk == null)
+            var walkDomainModel = await repository.GetByIdAsync(id);
+            if (walkDomainModel == null)
             {
                 return NotFound();
             }
 
-            return walk;
+            return Ok(mapper.Map<WalkDto>(walkDomainModel));
         }
 
-        // PUT: api/Walk/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutWalk(Guid id, Walk walk)
+        [HttpPut("{id:Guid}")]
+        public async Task<IActionResult> PutWalk([FromRoute] Guid id,
+            [FromBody] UpdateWalkRequestDto updateWalkRequestDto)
         {
-            if (id != walk.Id)
+            var walkDomainModel = mapper.Map<Walk>(updateWalkRequestDto);
+            var existingWalk = await repository.UpdateAsync(id, walkDomainModel);
+
+            if (existingWalk == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(walk).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!WalkExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(mapper.Map<WalkDto>(existingWalk));
         }
 
-        // POST: api/Walk
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Walk>> PostWalk(Walk walk)
+        [ValidateModel]
+        public async Task<ActionResult<Walk>> PostWalk([FromBody] AddWalkRequestDto addWalkRequestDto)
         {
-            _context.Walks.Add(walk);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetWalk", new { id = walk.Id }, walk);
+            var walkDomain = mapper.Map<Walk>(addWalkRequestDto);
+            await repository.AddAsync(walkDomain);
+            return Ok(mapper.Map<WalkDto>(walkDomain));
         }
 
-        // DELETE: api/Walk/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:Guid}")]
         public async Task<IActionResult> DeleteWalk(Guid id)
         {
-            var walk = await _context.Walks.FindAsync(id);
-            if (walk == null)
-            {
-                return NotFound();
-            }
-
-            _context.Walks.Remove(walk);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool WalkExists(Guid id)
-        {
-            return _context.Walks.Any(e => e.Id == id);
+            var walkDomain = await repository.DeleteAsync(id);
+            return Ok(mapper.Map<WalkDto>(walkDomain));
         }
     }
 }

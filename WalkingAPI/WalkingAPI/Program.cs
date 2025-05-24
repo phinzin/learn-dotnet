@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using WalkingAPI;
 using WalkingAPI.Mappings;
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<WalkDbContext>(options=>options.UseSqlServer(build
 
 // Map interface
 builder.Services.AddScoped<IRegionRepository, SqlRegionRepository>();
+builder.Services.AddScoped<IDifficultyRepository, SqlDifficultyRepository>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 var app = builder.Build();
@@ -30,6 +32,10 @@ if (app.Environment.IsDevelopment())
 
 
 }
+
+// custom exception handler
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 
 // app.UseHttpsRedirection();
 

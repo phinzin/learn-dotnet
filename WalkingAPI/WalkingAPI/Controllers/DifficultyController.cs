@@ -23,7 +23,7 @@ namespace WalkingAPI.Controllers
         }
 
         // GET: api/Difficulty/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:Guid}")]
         public async Task<ActionResult<Difficulty>> GetDifficulty(Guid id)
         {
             var difficulty = await _context.Difficulties.FindAsync(id);
@@ -38,7 +38,7 @@ namespace WalkingAPI.Controllers
 
         // PUT: api/Difficulty/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("{id:Guid}")]
         public async Task<IActionResult> PutDifficulty(Guid id, Difficulty difficulty)
         {
             if (id != difficulty.Id)
@@ -79,7 +79,7 @@ namespace WalkingAPI.Controllers
         }
 
         // DELETE: api/Difficulty/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:Guid}")]
         public async Task<IActionResult> DeleteDifficulty(Guid id)
         {
             var difficulty = await _context.Difficulties.FindAsync(id);
