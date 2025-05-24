@@ -1,0 +1,1 @@
+course: https://bosch-bgsv.udemy.com/course/build-rest-apis-with-aspnet-core-web-api-entity-framework/
